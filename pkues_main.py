@@ -53,7 +53,7 @@ def pkues_setup_default():
         # par = [k*c/wp, theta, kz*c/wp, kx*c/wp] (the scan variables)
         # par[0]: k*c/omega_p1,  par[1]: theta (degree)
         # par[2]: kz*c/omega_p1, par[3]: kx*c/omega_p1
-        'par': np.array([0.1, 10.0, 0.0, 0.0]),
+        'par': np.array([0.01, 20.0, 0.0, 0.0]),
 
         # ipa, ipb: which parameter to scan
         #   (1,1): scan k, fixed theta

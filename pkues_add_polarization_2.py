@@ -47,11 +47,13 @@ def add_polarization_ion(S, pas, pa, npa, Pola_norm, dV, jpl, pltc,
     # Ion species index = 0 (1st species, core ions) for both S==2 and S==3
     s_ion = 0
 
-    def phase_diff(a, b, eps=1e-12):
-        phi = np.full(a.shape, np.nan, dtype=float)
-        mask = (np.abs(a) > eps) & (np.abs(b) > eps)
-        phi[mask] = np.mod((np.angle(a[mask]) - np.angle(b[mask])) * 180 / np.pi + 360, 360)
-        return phi
+    # def phase_diff(a, b, eps=1e-12):
+    #     phi = np.full(a.shape, np.nan, dtype=float)
+    #     mask = (np.abs(a) > eps) & (np.abs(b) > eps)
+    #     phi[mask] = np.mod((np.angle(a[mask]) - np.angle(b[mask])) * 180 / np.pi + 360, 360)
+    #     return phi
+    def phase_diff(a, b):
+        return np.mod((np.angle(a) - np.angle(b)) * 180 / np.pi + 360, 360)
 
     phi_Bx_Vix = phase_diff(Pola_norm[:, 0, jpl, 3], dV[:, 0, s_ion, jpl])
     phi_By_Viy = phase_diff(Pola_norm[:, 0, jpl, 4], dV[:, 1, s_ion, jpl])

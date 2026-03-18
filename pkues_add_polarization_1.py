@@ -65,11 +65,13 @@ def add_polarization_electron(S, pas, pa, npa, Pola_norm, dV, jpl, pltc,
         return
 
     # Compute phase differences (in degrees, wrapped to [0, 360])
-    def phase_diff(a, b, eps=1e-12):
-        phi = np.full(a.shape, np.nan, dtype=float)
-        mask = (np.abs(a) > eps) & (np.abs(b) > eps)
-        phi[mask] = np.mod((np.angle(a[mask]) - np.angle(b[mask])) * 180 / np.pi + 360, 360)
-        return phi
+    # def phase_diff(a, b, eps=1e-12):
+    #     phi = np.full(a.shape, np.nan, dtype=float)
+    #     mask = (np.abs(a) > eps) & (np.abs(b) > eps)
+    #     phi[mask] = np.mod((np.angle(a[mask]) - np.angle(b[mask])) * 180 / np.pi + 360, 360)
+    #     return phi
+    def phase_diff(a, b):
+        return np.mod((np.angle(a) - np.angle(b)) * 180 / np.pi + 360, 360)
 
     phi_Bx_Vex = phase_diff(Pola_norm[:, 0, jpl, 3], dV[:, 0, s_elec, jpl])
     phi_By_Vey = phase_diff(Pola_norm[:, 0, jpl, 4], dV[:, 1, s_elec, jpl])

@@ -39,7 +39,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
         if ipa == ipb:  # 1D polarizations
             
             matrix = np.column_stack([
-                pas, np.real(wws[:, 0, jpl]), np.imag(wws[:, 0, jpl]),
+                np.real(pas), np.real(wws[:, 0, jpl]), np.imag(wws[:, 0, jpl]),
                 np.real(Pola_norm[:, 0, jpl, 0]), np.imag(Pola_norm[:, 0, jpl, 0]),
                 np.real(Pola_norm[:, 0, jpl, 1]), np.imag(Pola_norm[:, 0, jpl, 1]),
                 np.real(Pola_norm[:, 0, jpl, 2]), np.imag(Pola_norm[:, 0, jpl, 2]),
@@ -52,9 +52,18 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
                 np.real(dVnorm[:, 0, 0, jpl]), np.imag(dVnorm[:, 0, 0, jpl]),
                 np.real(dVnorm[:, 1, 0, jpl]), np.imag(dVnorm[:, 1, 0, jpl]),
                 np.real(dVnorm[:, 2, 0, jpl]), np.imag(dVnorm[:, 2, 0, jpl]),
-                JE[:, 0, 0, jpl], JE[:, 1, 0, jpl], JE[:, 2, 0, jpl],
-                JE[:, 0, 1, jpl], JE[:, 1, 1, jpl], JE[:, 2, 1, jpl]
-                ])
+                np.real(JE[:, 0, 0, jpl]), 
+                np.real(JE[:, 1, 0, jpl]),           
+                np.real(JE[:, 2, 0, jpl]), 
+                np.real(JE[:, 0, 1, jpl]), 
+                np.real(JE[:, 1, 1, jpl]), 
+                np.real(JE[:, 2, 1, jpl])])
+                # np.real(JE[:, 0, 0, jpl]), np.imag(JE[:, 0, 0, jpl]),
+                # np.real(JE[:, 1, 0, jpl]), np.imag(JE[:, 1, 0, jpl]),           
+                # np.real(JE[:, 2, 0, jpl]), np.imag(JE[:, 2, 0, jpl]),
+                # np.real(JE[:, 0, 1, jpl]), np.imag(JE[:, 0, 1, jpl]),
+                # np.real(JE[:, 1, 1, jpl]), np.imag(JE[:, 1, 1, jpl]),
+                # np.real(JE[:, 2, 1, jpl]), np.imag(JE[:, 2, 1, jpl])])
 
             np.savetxt(os.path.join(savepath, f'polarization_mode_{jpl+1}.dat'), matrix)
             _pas = 10.0**pas if iloga == 1 else pas.copy()
@@ -69,12 +78,14 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             ax = axes1[0, 0]
             ax.plot(_pas, np.real(wws2[:, 0, jpl]), '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim(np.percentile(np.real(wws2[:, 0, jpl]), [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(r'$\omega_r / \omega_{c1}$')
 
             # (1,2) omega_i
             ax = axes1[0, 1]
             ax.plot(_pas, np.imag(wws2[:, 0, jpl]), '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim(np.percentile(np.imag(wws2[:, 0, jpl]), [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(r'$\omega_i / \omega_{c1}$')
 
             # (1,3) Energy E / Energy B
@@ -82,6 +93,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             ax.plot(_pas, Pola_SI[:, 0, jpl, 6] / Pola_SI[:, 0, jpl, 7],
                     '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim(np.percentile(np.real(Pola_SI[:, 0, jpl, 6] / Pola_SI[:, 0, jpl, 7]), [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel('Energy E / Energy B')
 
             # (2,1) Ey/(iEx)
@@ -89,6 +101,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             val = np.real(Pola_norm[:, 0, jpl, 1] / (1j * Pola_norm[:, 0, jpl, 0]))
             ax.plot(_pas, val, '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim(np.percentile(val, [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(r'$E_y / (iE_x)$')
 
             # (2,2) |Ez|/|Ex|
@@ -96,6 +109,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             ax.plot(_pas, np.abs(Pola_norm[:, 0, jpl, 2]) / np.abs(Pola_norm[:, 0, jpl, 0]),
                     '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim([0, np.percentile(np.abs(Pola_norm[:, 0, jpl, 2]) / np.abs(Pola_norm[:, 0, jpl, 0]), 95) * 1.2])
             ax.set_xlabel(strpa); ax.set_ylabel(r'$|E_z| / |E_x|$')
 
             # (2,3)-(2,5) Ex, Ey, Ez components Re/Im
@@ -106,6 +120,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
                 ax.plot(_pas, np.real(Pola_norm[:, 0, jpl, col]), '-', color=color, linewidth=2, label='Re')
                 ax.plot(_pas, np.imag(Pola_norm[:, 0, jpl, col]), '--', color=color, linewidth=2, label='Im')
                 ax.set_xlim([np.min(_pa), np.max(_pa)])
+                ax.set_ylim(np.percentile(np.real(Pola_norm[:, 0, jpl, col]), [5, 95]))
                 ax.set_xlabel(strpa); ax.set_ylabel(lbl)
                 if ci == 0:
                     ax.legend(frameon=False, fontsize=7)
@@ -115,6 +130,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             val = np.real(Pola_norm[:, 0, jpl, 4] / (1j * Pola_norm[:, 0, jpl, 3]))
             ax.plot(_pas, val, '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim(np.percentile(val, [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(r'$B_y / (iB_x)$')
 
             # (3,2) |Bz|/|Bx|
@@ -122,6 +138,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             ax.plot(_pas, np.abs(Pola_norm[:, 0, jpl, 5]) / np.abs(Pola_norm[:, 0, jpl, 3]),
                     '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim([0, np.percentile(np.abs(Pola_norm[:, 0, jpl, 5]) / np.abs(Pola_norm[:, 0, jpl, 3]), 95) * 1.2])
             ax.set_xlabel(strpa); ax.set_ylabel(r'$|B_z| / |B_x|$')
 
             # (3,3)-(3,5) Bx, By, Bz components Re/Im
@@ -132,6 +149,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
                 ax.plot(_pas, np.real(Pola_norm[:, 0, jpl, col]), '-', color=color, linewidth=2, label='Re')
                 ax.plot(_pas, np.imag(Pola_norm[:, 0, jpl, col]), '--', color=color, linewidth=2, label='Im')
                 ax.set_xlim([np.min(_pa), np.max(_pa)])
+                ax.set_ylim(np.percentile(np.real(Pola_norm[:, 0, jpl, col]), [5, 95]))
                 ax.set_xlabel(strpa); ax.set_ylabel(lbl)
                 if ci == 0:
                     ax.legend(frameon=False, fontsize=7)
@@ -141,6 +159,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             val = np.real(Pola_norm[:, 0, jpl, 9] / (1j * Pola_norm[:, 0, jpl, 8]))
             ax.plot(_pas, val, '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim(np.percentile(val, [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(r'$J_y / (iJ_x)$')
 
             # (4,2) |Jz|/|Jx|
@@ -148,6 +167,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
             ax.plot(_pas, np.abs(Pola_norm[:, 0, jpl, 10]) / np.abs(Pola_norm[:, 0, jpl, 8]),
                     '-', color=color, linewidth=2)
             ax.set_xlim([np.min(_pa), np.max(_pa)])
+            ax.set_ylim(np.percentile(np.abs(Pola_norm[:, 0, jpl, 10]) / np.abs(Pola_norm[:, 0, jpl, 8]), [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(r'$|J_z| / |J_x|$')
 
             # (4,3)-(4,5) Jx, Jy, Jz components Re/Im
@@ -158,6 +178,7 @@ def pkues_output(wws, wws2, Pola, Pola_norm, Pola_SI, dV, dVnorm, JE,
                 ax.plot(_pas, np.real(Pola_norm[:, 0, jpl, col]), '-', color=color, linewidth=2, label='Re')
                 ax.plot(_pas, np.imag(Pola_norm[:, 0, jpl, col]), '--', color=color, linewidth=2, label='Im')
                 ax.set_xlim([np.min(_pa), np.max(_pa)])
+                ax.set_ylim(np.percentile(np.real(Pola_norm[:, 0, jpl, col]), [5, 95]))
                 ax.set_xlabel(strpa); ax.set_ylabel(lbl)
                 if ci == 0:
                     ax.legend(frameon=False, fontsize=7)

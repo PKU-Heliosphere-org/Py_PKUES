@@ -47,12 +47,14 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
         ax.plot(pas, np.real(dVnorm[:, 1, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 1, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{iy,\mathrm{core}} / (iV_{ix,\mathrm{core}})$')
 
         ax = axes[0, 1]
         ax.plot(pas, np.real(dVnorm[:, 2, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 2, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{iz,\mathrm{core}} / (iV_{ix,\mathrm{core}})$')
 
         ax = axes[0, 2]
@@ -60,6 +62,7 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
                 '-', color=color, linewidth=2)
         ax.plot(pas, np.ones(npa), '--', color='b')
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim([0, np.percentile(np.abs(dVnorm[:, 0, 0, jpl]) / np.abs(dVnorm[:, 0, 1, jpl]), 95) * 1.2])
         ax.set_xlabel(strpa); ax.set_ylabel(r'$|V_{ix,\mathrm{core}}| / |V_{ix,\mathrm{beam}}|$')
 
         for idx, (comp, label) in enumerate([(0, 'Vx_{core}'), (1, 'Vy_{core}'), (2, 'Vz_{core}')]):
@@ -67,6 +70,7 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
             ax.plot(pas, np.real(dVnorm[:, comp, 0, jpl]), '-', color=color, linewidth=2, label='Re')
             ax.plot(pas, np.imag(dVnorm[:, comp, 0, jpl]), '--', color=color, linewidth=2, label='Im')
             ax.set_xlim([np.min(pa), np.max(pa)])
+            ax.set_ylim(np.percentile(np.real(dVnorm[:, comp, 0, jpl]), [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(f'${label}$')
             ax.legend(frameon=False, fontsize=8)
 
@@ -75,12 +79,14 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
         ax.plot(pas, np.real(dVnorm[:, 1, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 1, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{iy,\mathrm{beam}} / (iV_{ix,\mathrm{beam}})$')
 
         ax = axes[1, 1]
         ax.plot(pas, np.real(dVnorm[:, 2, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 2, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{iz,\mathrm{beam}} / (iV_{ix,\mathrm{beam}})$')
 
         ax = axes[1, 2]
@@ -88,6 +94,7 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
                 '-', color=color, linewidth=2)
         ax.plot(pas, np.ones(npa), '--', color='b')
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim([0, np.percentile(np.abs(dVnorm[:, 0, 1, jpl]) / np.abs(dVnorm[:, 0, 2, jpl]), 95) * 1.2])
         ax.set_xlabel(strpa); ax.set_ylabel(r'$|V_{ix,\mathrm{beam}}| / |V_{ex}|$')
 
         for idx, (comp, label) in enumerate([(0, 'Vx_{beam}'), (1, 'Vy_{beam}'), (2, 'Vz_{beam}')]):
@@ -95,6 +102,7 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
             ax.plot(pas, np.real(dVnorm[:, comp, 1, jpl]), '-', color=color, linewidth=2, label='Re')
             ax.plot(pas, np.imag(dVnorm[:, comp, 1, jpl]), '--', color=color, linewidth=2, label='Im')
             ax.set_xlim([np.min(pa), np.max(pa)])
+            ax.set_ylim(np.percentile(np.real(dVnorm[:, comp, 1, jpl]), [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(f'${label}$')
             ax.legend(frameon=False, fontsize=8)
 
@@ -103,12 +111,14 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
         ax.plot(pas, np.real(dVnorm[:, 1, 2, jpl] / (1j * dVnorm[:, 0, 2, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 1, 2, jpl] / (1j * dVnorm[:, 0, 2, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{ey} / (iV_{ex})$')
 
         ax = axes[2, 1]
         ax.plot(pas, np.real(dVnorm[:, 2, 2, jpl] / (1j * dVnorm[:, 0, 2, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 2, 2, jpl] / (1j * dVnorm[:, 0, 2, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{ez} / (iV_{ex})$')
 
         ax = axes[2, 2]
@@ -116,6 +126,7 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
                 '-', color=color, linewidth=2)
         ax.plot(pas, np.ones(npa), '--', color='b')
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.abs(dVnorm[:, 0, 2, jpl]) / np.abs(dVnorm[:, 0, 0, jpl]), [5, 95]) * 1.2)
         ax.set_xlabel(strpa); ax.set_ylabel(r'$|V_{ex}| / |V_{ix,\mathrm{core}}|$')
 
         for idx, (comp, label) in enumerate([(0, 'Vx_e'), (1, 'Vy_e'), (2, 'Vz_e')]):
@@ -123,6 +134,7 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
             ax.plot(pas, np.real(dVnorm[:, comp, 2, jpl]), '-', color=color, linewidth=2, label='Re')
             ax.plot(pas, np.imag(dVnorm[:, comp, 2, jpl]), '--', color=color, linewidth=2, label='Im')
             ax.set_xlim([np.min(pa), np.max(pa)])
+            ax.set_ylim(np.percentile(np.real(dVnorm[:, comp, 2, jpl]), [5, 95]))
             ax.set_xlabel(strpa); ax.set_ylabel(f'${label}$')
             ax.legend(frameon=False, fontsize=8)
 
@@ -135,18 +147,21 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
         ax.plot(pas, np.real(dVnorm[:, 1, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 1, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{i,y} / (iV_{i,x})$')
 
         ax = axes[0, 1]
         ax.plot(pas, np.real(dVnorm[:, 2, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 2, 0, jpl] / (1j * dVnorm[:, 0, 0, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{i,z} / (iV_{i,x})$')
 
         ax = axes[0, 2]
         ax.plot(pas, np.abs(dVnorm[:, 0, 0, jpl]) / np.abs(dVnorm[:, 0, 1, jpl]),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim([0, np.percentile(np.abs(dVnorm[:, 0, 0, jpl]) / np.abs(dVnorm[:, 0, 1, jpl]), 95) * 1.2])
         ax.set_xlabel(strpa); ax.set_ylabel(r'$|V_{i,x}| / |V_{e,x}|$')
 
         for idx, (comp, label) in enumerate([(0, 'V_{i,x}'), (1, 'V_{i,y}'), (2, 'V_{i,z}')]):
@@ -154,6 +169,9 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
             ax.plot(pas, np.real(dVnorm[:, comp, 0, jpl]), '-', color=color, linewidth=2, label='Re')
             ax.plot(pas, np.imag(dVnorm[:, comp, 0, jpl]), '--', color=color, linewidth=2, label='Im')
             ax.set_xlim([np.min(pa), np.max(pa)])
+            ylim_min = min(np.percentile(np.real(dVnorm[:, comp, 0, jpl]), 5), np.percentile(np.imag(dVnorm[:, comp, 0, jpl]), 5))
+            ylim_max = max(np.percentile(np.real(dVnorm[:, comp, 0, jpl]), 95), np.percentile(np.imag(dVnorm[:, comp, 0, jpl]), 95))
+            ax.set_ylim([ylim_min, ylim_max])
             ax.set_xlabel(strpa); ax.set_ylabel(f'${label}$')
             ax.legend(frameon=False, fontsize=8)
 
@@ -162,18 +180,21 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
         ax.plot(pas, np.real(dVnorm[:, 1, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 1, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{e,y} / (iV_{e,x})$')
 
         ax = axes[1, 1]
         ax.plot(pas, np.real(dVnorm[:, 2, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim(np.percentile(np.real(dVnorm[:, 2, 1, jpl] / (1j * dVnorm[:, 0, 1, jpl])), [5, 95]))
         ax.set_xlabel(strpa); ax.set_ylabel(r'$V_{e,z} / (iV_{e,x})$')
 
         ax = axes[1, 2]
         ax.plot(pas, np.abs(dVnorm[:, 0, 0, jpl]) / np.abs(dVnorm[:, 0, 1, jpl]),
                 '-', color=color, linewidth=2)
         ax.set_xlim([np.min(pa), np.max(pa)])
+        ax.set_ylim([0, np.percentile(np.abs(dVnorm[:, 0, 0, jpl]) / np.abs(dVnorm[:, 0, 1, jpl]), 95) * 1.2])
         ax.set_xlabel(strpa); ax.set_ylabel(r'$|V_{i,y}| / |V_{e,y}|$')
 
         for idx, (comp, label) in enumerate([(0, 'V_{e,x}'), (1, 'V_{e,y}'), (2, 'V_{e,z}')]):
@@ -181,6 +202,9 @@ def plot_comp_velocity(S, pas, pa, dVnorm, jpl, pltc, strpa, npa, savepath, figs
             ax.plot(pas, np.real(dVnorm[:, comp, 1, jpl]), '-', color=color, linewidth=2, label='Re')
             ax.plot(pas, np.imag(dVnorm[:, comp, 1, jpl]), '--', color=color, linewidth=2, label='Im')
             ax.set_xlim([np.min(pa), np.max(pa)])
+            ylim_min = min(np.percentile(np.real(dVnorm[:, comp, 1, jpl]), 5), np.percentile(np.imag(dVnorm[:, comp, 1, jpl]), 5))
+            ylim_max = max(np.percentile(np.real(dVnorm[:, comp, 1, jpl]), 95), np.percentile(np.imag(dVnorm[:, comp, 1, jpl]), 95))
+            ax.set_ylim([ylim_min, ylim_max])
             ax.set_xlabel(strpa); ax.set_ylabel(f'${label}$')
             ax.legend(frameon=False, fontsize=8)
 

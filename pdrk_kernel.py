@@ -168,10 +168,15 @@ def pdrk_kernel(init, icalp=0, wws=None, wws2=None, Pola=None,
                     eps = 1j * 1e-16
                     wg_local = wws[jpa, jpb, jpl] * wcs1 + eps
 
+                    _nan_c = np.nan + 0j * np.nan
+                    eigvec_reliable = True
+
                     try:
                         eigenvalues, eigenvectors = sparse_eigs(
                             M.astype(complex), k=nw, sigma=wg_local)
-                    except Exception:
+                    except Exception as e:
+                        print(f"[WARN] sparse_eigs failed at jpa={jpa}, jpb={jpb}, jpl={jpl}: {e}")
+                        eigvec_reliable = False
                         eigenvalues = np.array([wg_local])
                         eigenvectors = np.zeros((NN, 1), dtype=complex)
 
@@ -180,100 +185,144 @@ def pdrk_kernel(init, icalp=0, wws=None, wws2=None, Pola=None,
                     # Extract polarization (dE, dB) from eigenvector
                     V = eigenvectors
                     D_val = eigenvalues[0]
-                    dEB = V[(NN - 6):NN, 0]  # last 6 rows of first eigenvector
+                    v0 = V[:, 0]
+                    dEB = v0[(NN - 6):NN]  # last 6 rows of first eigenvector
 
-                    # 先把当前模态频率写进去，pkues_velocity 会立即用到
-                    wws2[jpa, jpb, jpl] = D_val / wcs1
+                    # ============================================================
+                    # 特征向量可靠性检查：
+                    # 计算残差 r = ||M*v - lambda*v|| / |lambda|
+                    # 当 k→0 矩阵近奇异时，shift-invert 求出的特征向量可能
+                    # 完全不可信（残差 >> 1）。此时该 k 点的极化量无物理意义，
+                    # 全部设为 NaN，绘图时自动跳过。
+                    # ============================================================
+                    if eigvec_reliable:
+                        M_dense = M.toarray() if sparse.issparse(M) else M
+                        residual_vec = M_dense @ v0 - D_val * v0
+                        res_norm = np.linalg.norm(residual_vec)
+                        denom_norm = np.abs(D_val)
+                        if denom_norm > 0:
+                            rel_residual = res_norm / denom_norm
+                        else:
+                            rel_residual = res_norm
+                        # 阈值：相对残差超过 1e-3 则认为不可信
+                        if rel_residual > 1e-10:
+                            print(f"  [SKIP] jpa={jpa}: eigenvector unreliable "
+                                  f"(rel_residual={rel_residual:.2e}), set to NaN")
+                            eigvec_reliable = False
 
-                    # Scaling: 默认仍优先按 dBy 归一化，但要防止 dBy 过小
-                    scaling_factor = 1.0
-                    den = dEB[4]
-                    if np.abs(den) < 1e-12:
-                        # dBy 太小时，改用 |Bx,By,Bz| 中最大的分量做参考
-                        idx_ref = 3 + np.argmax(np.abs(dEB[3:6]))
-                        den = dEB[idx_ref]
-                        if np.abs(den) < 1e-12:
-                            den = 1.0 + 0.0j
+                    if not eigvec_reliable:
+                        # 该 k 点全部极化量设为 NaN
+                        wws2[jpa, jpb, jpl] = _nan_c
+                        Pola_SI[jpa, jpb, jpl, :] = _nan_c
+                        Pola_norm[jpa, jpb, jpl, :] = _nan_c
+                        Pola[jpa, jpb, jpl, :] = _nan_c
+                        scaling[jpa, jpb, jpl] = _nan_c
+                        for s_idx in range(S):
+                            for comp in range(3):
+                                Js[jpa, comp, s_idx, jpl] = _nan_c
+                                dV[jpa, comp, s_idx, jpl] = _nan_c
+                                dVnorm[jpa, comp, s_idx, jpl] = _nan_c
+                                JE[jpa, comp, s_idx, jpl] = _nan_c
+                                Zp_norm[jpa, comp, s_idx, jpl] = _nan_c
+                                Zm_norm[jpa, comp, s_idx, jpl] = _nan_c
+                            xinorm[jpa, s_idx, jpl] = _nan_c
+                    else:
+                        # 特征向量可信，正常计算极化量
+                        wws2[jpa, jpb, jpl] = D_val / wcs1
 
-                    scaling[jpa, jpb, jpl] = scaling_factor * B0 / den
+                        # Scaling: 优先按 dBy 归一化，用相对阈值判断
+                        scaling_factor = 1.0
+                        max_dB = np.max(np.abs(dEB[3:6]))
+                        max_dEB = np.max(np.abs(dEB))
+                        den = dEB[4]
+                        if max_dB > 0 and np.abs(den) < max_dB * 1e-6:
+                            idx_ref = 3 + np.argmax(np.abs(dEB[3:6]))
+                            den = dEB[idx_ref]
+                        if np.abs(den) == 0:
+                            if max_dEB > 0:
+                                den = dEB[np.argmax(np.abs(dEB))]
+                            else:
+                                den = 1.0 + 0.0j
 
-                    Pola_SI[jpa, jpb, jpl, 0:6] = dEB * scaling[jpa, jpb, jpl]
-                    Pola_norm[jpa, jpb, jpl, 0:6] = Pola_SI[jpa, jpb, jpl, 0:6] / B0
-                    Pola_norm[jpa, jpb, jpl, 0:3] = Pola_norm[jpa, jpb, jpl, 0:3] / vA
+                        scaling[jpa, jpb, jpl] = scaling_factor * B0 / den
 
-                    # Energy densities
-                    dE = Pola_SI[jpa, jpb, jpl, 0:3]
-                    dB = Pola_SI[jpa, jpb, jpl, 3:6]
-                    Pola_SI[jpa, jpb, jpl, 6] = (
-                        np.sum(dE * np.conj(dE)).real * epsilon0 * 0.5)
-                    Pola_SI[jpa, jpb, jpl, 7] = (
-                        np.sum(dB * np.conj(dB)).real / mu0 * 0.5)
+                        Pola_SI[jpa, jpb, jpl, 0:6] = dEB * scaling[jpa, jpb, jpl]
+                        Pola_norm[jpa, jpb, jpl, 0:6] = Pola_SI[jpa, jpb, jpl, 0:6] / B0
+                        Pola_norm[jpa, jpb, jpl, 0:3] = Pola_norm[jpa, jpb, jpl, 0:3] / vA
 
-                    # Current density from Ampere's law
-                    Pola_SI[jpa, jpb, jpl, 8] = (
-                        c2 * kz * Pola_SI[jpa, jpb, jpl, 4] -
-                        D_val * Pola_SI[jpa, jpb, jpl, 0]) * epsilon0 / 1j
-                    Pola_SI[jpa, jpb, jpl, 9] = (
-                        c2 * kx * Pola_SI[jpa, jpb, jpl, 5] -
-                        c2 * kz * Pola_SI[jpa, jpb, jpl, 3] -
-                        D_val * Pola_SI[jpa, jpb, jpl, 1]) * epsilon0 / 1j
-                    Pola_SI[jpa, jpb, jpl, 10] = (
-                        -c2 * kx * Pola_SI[jpa, jpb, jpl, 4] -
-                        D_val * Pola_SI[jpa, jpb, jpl, 2]) * epsilon0 / 1j
+                        # Energy densities
+                        dE = Pola_SI[jpa, jpb, jpl, 0:3]
+                        dB = Pola_SI[jpa, jpb, jpl, 3:6]
+                        Pola_SI[jpa, jpb, jpl, 6] = (
+                            np.sum(dE * np.conj(dE)).real * epsilon0 * 0.5)
+                        Pola_SI[jpa, jpb, jpl, 7] = (
+                            np.sum(dB * np.conj(dB)).real / mu0 * 0.5)
 
-                    # Normalized current
-                    Pola_norm[jpa, jpb, jpl, 8] = (
-                        Pola_SI[jpa, jpb, jpl, 8] / 1j / (qs[0] * ns0[0] * vA))
-                    Pola_norm[jpa, jpb, jpl, 9] = (
-                        Pola_SI[jpa, jpb, jpl, 9] / 1j / (qs[0] * ns0[0] * vA))
-                    Pola_norm[jpa, jpb, jpl, 10] = (
-                        Pola_SI[jpa, jpb, jpl, 10] / 1j / (qs[0] * ns0[0] * vA))
+                        # Current density from Ampere's law
+                        Pola_SI[jpa, jpb, jpl, 8] = (
+                            c2 * kz * Pola_SI[jpa, jpb, jpl, 4] -
+                            D_val * Pola_SI[jpa, jpb, jpl, 0]) * epsilon0 / 1j
+                        Pola_SI[jpa, jpb, jpl, 9] = (
+                            c2 * kx * Pola_SI[jpa, jpb, jpl, 5] -
+                            c2 * kz * Pola_SI[jpa, jpb, jpl, 3] -
+                            D_val * Pola_SI[jpa, jpb, jpl, 1]) * epsilon0 / 1j
+                        Pola_SI[jpa, jpb, jpl, 10] = (
+                            -c2 * kx * Pola_SI[jpa, jpb, jpl, 4] -
+                            D_val * Pola_SI[jpa, jpb, jpl, 2]) * epsilon0 / 1j
 
-                    # Calculate velocity
-                    Js, dV, dVnorm, xinorm, JE = pkues_velocity(
-                        jpa, jpl, wws2, Pola_SI, kz, kx, rhocsab,
-                        vtzs, vds, wcs, wps2, czj, bzj, lmdTab, rsab,
-                        ns0, qs, vA, epsilon0, mu0, wcs1,
-                        S, N, J, SNJ, NN,
-                        Js, dV, dVnorm, xinorm, JE)
+                        # Normalized current
+                        Pola_norm[jpa, jpb, jpl, 8] = (
+                            Pola_SI[jpa, jpb, jpl, 8] / 1j / (qs[0] * ns0[0] * vA))
+                        Pola_norm[jpa, jpb, jpl, 9] = (
+                            Pola_SI[jpa, jpb, jpl, 9] / 1j / (qs[0] * ns0[0] * vA))
+                        Pola_norm[jpa, jpb, jpl, 10] = (
+                            Pola_SI[jpa, jpb, jpl, 10] / 1j / (qs[0] * ns0[0] * vA))
 
+                        # Calculate velocity
+                        Js, dV, dVnorm, xinorm, JE = pkues_velocity(
+                            jpa, jpl, wws2, Pola_SI, kz, kx, rhocsab,
+                            vtzs, vds, wcs, wps2, czj, bzj, lmdTab, rsab,
+                            ns0, qs, vA, epsilon0, mu0, wcs1,
+                            S, N, J, SNJ, NN,
+                            Js, dV, dVnorm, xinorm, JE)
 
-                    # Elsasser variables: Z+ = dV + dB/sqrt(mu0*rho), Z- = dV - dB/sqrt(mu0*rho)
-                    for s_idx in range(S):
-                        density_ratio = np.sqrt(ns0[0] / ns0[s_idx])
-                        for comp in range(3):
-                            b_comp = Pola_norm[jpa, jpb, jpl, 3 + comp] * density_ratio
-                            Zp_norm[jpa, comp, s_idx, jpl] = (
-                                dVnorm[jpa, comp, s_idx, jpl] + b_comp)
-                            Zm_norm[jpa, comp, s_idx, jpl] = (
-                                dVnorm[jpa, comp, s_idx, jpl] - b_comp)
+                        # Elsasser variables
+                        for s_idx in range(S):
+                            density_ratio = np.sqrt(ns0[0] / ns0[s_idx])
+                            for comp in range(3):
+                                b_comp = Pola_norm[jpa, jpb, jpl, 3 + comp] * density_ratio
+                                Zp_norm[jpa, comp, s_idx, jpl] = (
+                                    dVnorm[jpa, comp, s_idx, jpl] + b_comp)
+                                Zm_norm[jpa, comp, s_idx, jpl] = (
+                                    dVnorm[jpa, comp, s_idx, jpl] - b_comp)
 
-                    # Normalize dEB for storage
-                    dEB = dEB / dEB[0]
-                    ctmp = (np.sqrt(np.real(dEB[0])**2 + np.real(dEB[1])**2 +
-                                    np.real(dEB[2])**2) +
-                            np.imag(dEB[0])**2 + np.imag(dEB[1])**2 +
-                            np.imag(dEB[2])**2)
-                    dEB = dEB / ctmp
-                    Pola[jpa, jpb, jpl, 0:6] = dEB
-                    wws2[jpa, jpb, jpl] = D_val / wcs1
+                        # Normalize dEB for storage
+                        dEB = dEB / dEB[0]
+                        ctmp = (np.sqrt(np.real(dEB[0])**2 + np.real(dEB[1])**2 +
+                                        np.real(dEB[2])**2) +
+                                np.imag(dEB[0])**2 + np.imag(dEB[1])**2 +
+                                np.imag(dEB[2])**2)
+                        dEB = dEB / ctmp
+                        Pola[jpa, jpb, jpl, 0:6] = dEB
+                        wws2[jpa, jpb, jpl] = D_val / wcs1
 
-                    # Energy
-                    dEx, dEy, dEz = dEB[0], dEB[1], dEB[2]
-                    dBx, dBy, dBz = dEB[3], dEB[4], dEB[5]
-                    UE = (dEx * np.conj(dEx) + dEy * np.conj(dEy) +
-                          dEz * np.conj(dEz)) * epsilon0 * 0.5
-                    UB = (dBx * np.conj(dBx) + dBy * np.conj(dBy) +
-                          dBz * np.conj(dBz)) / mu0 * 0.5
-                    Pola[jpa, jpb, jpl, 6] = UE
-                    Pola[jpa, jpb, jpl, 7] = UB
+                        # Energy
+                        dEx, dEy, dEz = dEB[0], dEB[1], dEB[2]
+                        dBx, dBy, dBz = dEB[3], dEB[4], dEB[5]
+                        UE = (dEx * np.conj(dEx) + dEy * np.conj(dEy) +
+                              dEz * np.conj(dEz)) * epsilon0 * 0.5
+                        UB = (dBx * np.conj(dBx) + dBy * np.conj(dBy) +
+                              dBz * np.conj(dBz)) / mu0 * 0.5
+                        Pola[jpa, jpb, jpl, 6] = UE
+                        Pola[jpa, jpb, jpl, 7] = UB
 
                 else:
                     # Standard sparse solve
                     try:
                         d = sparse_eigs(M.astype(complex), k=nw, sigma=wg,
                                         return_eigenvectors=False)
-                    except Exception:
+                    except Exception as e:
+                        print(f"[WARN] sparse_eigs failed at jpa={jpa}, jpb={jpb}, jpl={jpl}: {e}")
                         d = np.array([wg])
 
             # Sort by growth rate (descending imaginary part)
