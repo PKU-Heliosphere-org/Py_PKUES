@@ -11,7 +11,6 @@ Version1 (2026.3.19)
 ## Overview
 
 PDRK solves the linearized Vlasov–Maxwell system for an arbitrary number of plasma species with bi-Maxwellian (or loss-cone) equilibrium distributions and parallel drifts. The dispersion equation is reformulated as a matrix eigenvalue problem using J-pole approximations of the plasma dispersion function Z(ζ), enabling simultaneous extraction of all wave modes at each (k, θ) point.  
-PDRK 解决了线性化的 Vlasov–Maxwell 系统，适用于任意数量具有双麦克斯韦（或损失锥）平衡分布和平行漂移的等离子体物种。色散方程被重新表述为矩阵特征值问题，利用等离子体色散函数 Z（ζ）的 J 极近似，从而实现在每个（k， θ）点同时提取所有波模。
 
 Key capabilities:
 
@@ -229,6 +228,7 @@ Open the `.vtk` files in [ParaView](https://www.paraview.org/) to render isosurf
 - **Hua-sheng Xie** (IFTS-ZJU / FRI-ENN) — Original MATLAB PDRK code
 - **Xingyu Zhu, Die Duan, Jiansen He** (Peking University) — PKUES extensions: polarization analysis, VDF computation, VTK output
 - **Richard Denton** (Dartmouth), **Xin Tao** (USTC), **Jin-song Zhao** (PMO) — Contributions to the original PDRK framework
+- **Haoen Xie** (Peking University) -- convert to Python version
 
 ## License
 
