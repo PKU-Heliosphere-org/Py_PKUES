@@ -23,13 +23,15 @@ from scipy.sparse.linalg import eigs as sparse_eigs
 from pdrk_em3d_matrix import pdrk_em3d_matrix
 from pdrk_es3d_matrix import pdrk_es3d_matrix
 from pkues_velocity import pkues_velocity
+from pkues_write_f_SI import run_vdf_for_mode
 
 
 def pdrk_kernel(init, icalp=0, wws=None, wws2=None, Pola=None,
                 Pola_norm=None, Pola_SI=None, jpl=0,
                 Js=None, dV=None, dVnorm=None, xinorm=None, JE=None,
                 Zp_norm=None, Zm_norm=None, scaling=None,
-                idf=0, jpa_df=0, jpb_df=0):
+                idf=0, jpa_df=0, jpb_df=0, jpl_df=0, s_df=0,
+                vdf_config=None, savepath='./', figstr=''):
     """
     Core kernel: scan over (pa, pb) and solve the dispersion eigenvalue problem.
 
@@ -296,7 +298,13 @@ def pdrk_kernel(init, icalp=0, wws=None, wws2=None, Pola=None,
                                 Zm_norm[jpa, comp, s_idx, jpl] = (
                                     dVnorm[jpa, comp, s_idx, jpl] - b_comp)
 
-                        # Normalize dEB for storage
+                        if idf == 1 and jpa == jpa_df and jpb == jpb_df:
+                            if vdf_config is not None:
+                                run_vdf_for_mode(jpa, jpb, jpl_df, s_df, init,
+                                                wws, Pola_SI, scaling, kx, kz,
+                                                vdf_config, savepath, figstr)
+                                
+                        # Normalize dEB for storage 
                         dEB = dEB / dEB[0]
                         ctmp = (np.sqrt(np.real(dEB[0])**2 + np.real(dEB[1])**2 +
                                         np.real(dEB[2])**2) +

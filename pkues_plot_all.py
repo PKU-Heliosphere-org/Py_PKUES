@@ -856,7 +856,8 @@ class _ModeSelector2D:
 
 def _run_pkues_output_from_selected_modes(
         init, wws, pa, pb, npa, npb, ipa, ipb, iloga, ilogb,
-        strpa, strpb, savepath, figstr, betasz, betasp, start_list):
+        strpa, strpb, savepath, figstr, betasz, betasp, start_list,
+        idf=0, jpa_df=0, jpb_df=0, jpl_df=0, s_df=0, vdf_config=None):
     """
     对已追踪得到的选中波模 wws，复用 pdrk_kernel(icalp=1) 计算
     wws2 / Pola / Pola_norm / Pola_SI / dV / dVnorm / JE / Zp_norm / Zm_norm，
@@ -920,7 +921,15 @@ def _run_pkues_output_from_selected_modes(
             JE=JE,
             Zp_norm=Zp_norm,
             Zm_norm=Zm_norm,
-            scaling=scaling
+            scaling=scaling,
+            idf=idf,
+            jpa_df=jpa_df,
+            jpb_df=jpb_df,
+            jpl_df=jpl_df,
+            s_df=s_df,
+            vdf_config=vdf_config,
+            savepath=savepath,
+            figstr=figstr
         )
 
     # pkues_output 里是直接拼 savepath + filename，最好保证末尾有分隔符
@@ -978,7 +987,9 @@ def pdrk_plot_all_interactive(ww, pa, pb, npa, npb, ipa, ipb,
                                savepath='./', figstr='test',
                                rex=1.0, rey=1.0, rez=1.0,
                                wpdat=None, pred_weight=0.70,
-                               init=None, run_pkues_output=True):
+                               init=None, run_pkues_output=True,
+                               idf=0, jpa_df=0, jpb_df=0,
+                               jpl_df=0, s_df=0, vdf_config=None):
     """
     Interactive plot of ALL dispersion solutions with click-to-select
     and robust Hungarian-algorithm-based mode tracing.
@@ -1378,7 +1389,9 @@ def pdrk_plot_all_interactive(ww, pa, pb, npa, npb, ipa, ipb,
             figstr=figstr,
             betasz=betasz,
             betasp=betasp,
-            start_list=start_list
+            start_list=start_list,
+            idf=idf, jpa_df=jpa_df, jpb_df=jpb_df,
+            jpl_df=jpl_df, s_df=s_df, vdf_config=vdf_config
         )
 
     return wws, wpdat
@@ -1399,7 +1412,9 @@ def pdrk_plot_select(wwn_plot, pa, pb, npa, npb, ipa, ipb, wpdat,
                      savepath='./', figstr='test',
                      rex=1.0, rey=1.0, rez=1.0,
                      use_hungarian=True, pred_weight=0.70,
-                     init=None, run_pkues_output=False):
+                     init=None, run_pkues_output=False,
+                     idf=0, jpa_df=0, jpb_df=0,
+                     jpl_df=0, s_df=0, vdf_config=None):
     """
     Non-interactive batch mode: trace and plot given wpdat directly.
 

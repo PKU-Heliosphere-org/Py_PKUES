@@ -81,6 +81,26 @@ def pkues_setup_default():
 
         # ----- Output settings -----
         'savepath': './output/',
+        'idf': 0,             # 0 = 不计算 VDF, 1 = 计算
+        'jpa_df': 300,         # 要计算 VDF 的 k 点索引
+        'jpb_df': 0,
+        'jpl_df': 0,          # 波模索引
+        's_df': 0,            # 粒子种类索引（0-based）
+        'vdf_config': {
+            'ampl': 0.01,
+            'vxrange': (-3, 3),    # vA 单位
+            'vyrange': (-3, 3),
+            'vzrange': (-3, 3),
+            'vxsteps': 50,
+            'vysteps': 50,
+            'vzsteps': 50,
+            'damping': False,
+            'const_r': True,
+            'periods': True,
+            'num_periods': 1,
+            'timesteps': 20,
+},
+
     }
     return config
 
@@ -175,6 +195,14 @@ def run_pdrk(config=None, wpdat=None, interactive=True,
     wws = None
     wpdat_out = None
 
+    # Extract VDF configuration
+    idf = config.get('idf', 0)
+    jpa_df = config.get('jpa_df', 0)
+    jpb_df = config.get('jpb_df', 0)
+    jpl_df = config.get('jpl_df', 0)
+    s_df = config.get('s_df', 0)
+    vdf_config = config.get('vdf_config', None)
+
     if interactive and wpdat is None:
         # Interactive mode: user clicks to select modes
         wws, wpdat_out = pdrk_plot_all_interactive(
@@ -193,7 +221,9 @@ def run_pdrk(config=None, wpdat=None, interactive=True,
             rex=rex, rey=rey, rez=rez,
             pred_weight=pred_weight,
             init=init,
-            run_pkues_output=True)
+            run_pkues_output=True,
+            idf=idf, jpa_df=jpa_df, jpb_df=jpb_df,
+            jpl_df=jpl_df, s_df=s_df, vdf_config=vdf_config)
 
     elif wpdat is not None:
         # Batch mode: trace given wpdat
@@ -211,7 +241,9 @@ def run_pdrk(config=None, wpdat=None, interactive=True,
             runtime=runtime,
             savepath=init['savepath'], figstr=figstr,
             rex=rex, rey=rey, rez=rez,
-            use_hungarian=use_hungarian, pred_weight=pred_weight)
+            use_hungarian=use_hungarian, pred_weight=pred_weight,
+            idf=idf, jpa_df=jpa_df, jpb_df=jpb_df,
+            jpl_df=jpl_df, s_df=s_df, vdf_config=vdf_config)
         wpdat_out = wpdat
 
     # ------------------------------------------------------------------
@@ -404,5 +436,11 @@ Tracking methods:
 
     # Default run
     config = pkues_setup_default()
+    config['idf'] = 1
+    config['jpa_df'] = 300      # 第 300 个 k 点
+    config['jpb_df'] = 0
+    config['jpl_df'] = 0        # 第 1 支波模
+    config['s_df'] = 0           # 质子（第 1 种粒子）
+    config['vdf_config']['ampl'] = 0.01
     result = run_pdrk(config, interactive=True)
 
