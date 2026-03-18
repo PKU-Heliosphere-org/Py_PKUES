@@ -1,5 +1,9 @@
 """
 pkues_main_modified.py
+
+Originally developed in MATLAB by Hua-sheng Xie (IFTS-ZJU). 
+extended by Xingyu Zhu, Die Duan, and Jiansen He, and converted to Python by Haoen Xie (Peking University).
+
 Main driver program for PDRK (Plasma Dispersion Relation solver, Kinetic).
 
 Workflow:
