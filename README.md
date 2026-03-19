@@ -25,8 +25,11 @@ Key capabilities:
 ## References
 
 > H. S. Xie & Y. Xiao, *PDRK: A General Kinetic Dispersion Relation Solver for Magnetized Plasma*, Plasma Science and Technology, Vol. 18, No. 2, p97 (2016). [DOI:10.1088/1009-0630/18/2/01](https://doi.org/10.1088/1009-0630/18/2/01)
+
 > Luo, Q., Zhu, X., He, J., Cui, J., Lai, H., Verscharen, D., & Duan, D. (2022). Coherence of Ion Cyclotron Resonance in Damped Ion Cyclotron Waves in Space Plasmas. The Astrophysical Journal, 928(1), 36.
+
 > He, J., Zhu, X., Luo, Q., Hou, C., Verscharen, D., Duan, D., ... & Yao, Z. (2022). Observations of rapidly growing whistler waves in front of space plasma shock due to resonance interaction between fluctuating electron velocity distributions and electromagnetic fields. The Astrophysical Journal, 941(2), 147.
+
 > Zhu, X., He, J., Duan, D., Verscharen, D., Owen, C. J., Fedorov, A., ... & Horbury, T. S. (2023). Non-field-aligned Proton Beams and Their Roles in the Growth of Fast Magnetosonic/Whistler Waves: Solar Orbiter Observations. The Astrophysical Journal, 953(2), 161.
 
 ## Requirements
