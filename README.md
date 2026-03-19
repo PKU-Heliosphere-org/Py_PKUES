@@ -1,6 +1,6 @@
 # Py_PKUES
 
-A Python implementation of **PDRK** (Plasma Dispersion Relation solver, Kinetic) — a general kinetic dispersion relation solver for magnetized plasma with bi-Maxwellian equilibrium distribution.
+A Python implementation of **PDRK** (Plasma Dispersion Relation solver, Kinetic) and **PKUES** — a general kinetic dispersion relation solver for magnetized plasma with bi-Maxwellian equilibrium distribution.
 
 Originally developed in MATLAB by Hua-sheng Xie (IFTS-ZJU). extended by Xingyu Zhu, Die Duan, and Jiansen He, and converted to Python by Xie Haoen (Peking University).
 
